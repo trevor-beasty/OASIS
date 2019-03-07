@@ -9,13 +9,16 @@
 import Foundation
 import RxSwift
 
-protocol ChangeStoreDefinition: StoreDefinition {
+internal let abstractMethodMessage = "abstract method must be overriden by subclass"
+
+public protocol ChangeStoreDefinition: StoreDefinition {
     associatedtype Change
 }
 
 open class ChangeStore<State, Change, Action, Output>: StoreType {
     
     private let stateVariable: Variable<State>
+    private let changeSubject = PublishSubject<Change>()
     private let actionSubject = PublishSubject<Action>()
     private let outputSubject = PublishSubject<Output>()
     
@@ -28,18 +31,40 @@ open class ChangeStore<State, Change, Action, Output>: StoreType {
     
     private func setUp() {
         
+        changeSubject.asObservable()
+            .map({
+                return type(of: self).reduce(change: $0, state: self.stateVariable.value)
+            })
+        // TODO: 'Push' sequence onto stateVariable? (Is it possible?) May need to change stateVariable Type.
+            .subscribe(onNext: {
+                self.stateVariable.value = $0
+            })
+            .disposed(by: bag)
+        
+        actionSubject.asObservable()
+            .observeOn(SerialDispatchQueueScheduler(qos: .userInitiated))
+            .subscribe(onNext: {
+                self.handleAction($0)
+            })
+            .disposed(by: bag)
+        
     }
     
-    open func handleAction(_ action: Action) {
-        fatalError()
+    open func handleAction(_ action: Action) { fatalError(abstractMethodMessage) }
+    
+    open class func reduce(change: Change, state: State) -> State { fatalError(abstractMethodMessage) }
+    
+    public func dispatchChange(_ change: Change) {
+        changeSubject.onNext(change)
     }
     
-    open func reduce(change: Change, state: State) -> State {
-        fatalError()
+    public func dispatchOutput(_ output: Output) {
+        outputSubject.onNext(output)
     }
     
     public func observeState(_ stateObserver: @escaping (State) -> Void) {
         stateVariable.asObservable()
+            .observeOn(MainScheduler.instance)
             .subscribe(onNext: {
                 stateObserver($0)
             })
@@ -52,6 +77,7 @@ open class ChangeStore<State, Change, Action, Output>: StoreType {
     
     public func observeOutput(_ outputObserver: @escaping (Output) -> Void) {
         outputSubject.asObservable()
+            .observeOn(MainScheduler.instance)
             .subscribe(onNext: {
                 outputObserver($0)
             })
