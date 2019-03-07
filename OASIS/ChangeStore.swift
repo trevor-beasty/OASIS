@@ -11,10 +11,6 @@ import RxSwift
 
 internal let abstractMethodMessage = "abstract method must be overriden by subclass"
 
-public protocol ChangeStoreDefinition: StoreDefinition {
-    associatedtype Change
-}
-
 open class ChangeStore<State, Change, Action, Output>: StoreType {
     
     private let stateVariable: Variable<State>
@@ -62,7 +58,15 @@ open class ChangeStore<State, Change, Action, Output>: StoreType {
     }
     
     internal var state: Observable<State> { return stateVariable.asObservable() }
-    internal var getState: () -> State { return { return self.stateVariable.value } }
+    
+    internal var getState: () -> State {
+        
+        return { [stateVariable] in
+            return stateVariable.value
+        }
+        
+    }
+    
     internal var action: AnyObserver<Action> { return actionSubject.asObserver() }
     internal var output: Observable<Output> { return outputSubject.asObservable() }
     

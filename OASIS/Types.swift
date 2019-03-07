@@ -116,12 +116,15 @@ public class AnyStore<State, Action, Output>: StoreType {
     let output: Observable<Output>
     let bag: DisposeBag
     
+    private let store: AnyObject
+    
     internal init<Store: StoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
         self.state = store.state
         self.getState = store.getState
         self.action = store.action
         self.output = store.output
         self.bag = store.bag
+        self.store = store
     }
     
 }
@@ -133,11 +136,14 @@ public class AnyViewStore<State, Action>: ViewStoreType {
     let action: AnyObserver<Action>
     let bag: DisposeBag
     
+    private let store: AnyObject
+    
     internal init<Store: ViewStoreType>(_ store: Store) where Store.State == State, Store.Action == Action {
         self.state = store.state
         self.getState = store.getState
         self.action = store.action
         self.bag = store.bag
+        self.store = store
     }
     
 }
@@ -149,11 +155,14 @@ public class AnyClientStore<State, Action, Output>: ClientStoreType {
     let output: Observable<Output>
     let bag: DisposeBag
     
+    private let store: AnyObject
+    
     internal init<Store: ClientStoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
         self.getState = store.getState
         self.action = store.action
         self.output = store.output
         self.bag = store.bag
+        self.store = store
     }
     
 }
