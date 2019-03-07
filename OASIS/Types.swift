@@ -33,15 +33,6 @@ import RxSwift
 //    func render(_ viewState: ViewState)
 //}
 //
-//public protocol ViewStoreType: AnyObject {
-//    associatedtype State
-//    associatedtype Action
-//
-//    typealias StateObserver = (State) -> Void
-//
-//    func observeState(_ stateObserver: @escaping StateObserver)
-//    func dispatchAction(_ action: Action)
-//}
 //
 //public protocol ClientStoreType: AnyObject {
 //    associatedtype Action
@@ -55,21 +46,43 @@ import RxSwift
 //
 //public protocol StoreType: ViewStoreType, ClientStoreType {}
 
-internal protocol StoreType: AnyObject {
+internal protocol StoreType: StateObservableType, StateStoreType, ActionObserverType, OutputObservableType { }
+
+internal protocol ViewStoreType: StateObservableType, StateStoreType, ActionObserverType { }
+
+internal protocol ClientStoreType: StateStoreType, ActionObserverType, OutputObservableType { }
+
+internal protocol StateObservableType: AnyObject {
     associatedtype State
-    associatedtype Action
-    associatedtype Output
     
     var state: Observable<State> { get }
+    var bag: DisposeBag { get }
+}
+
+internal protocol StateStoreType: AnyObject {
+    associatedtype State
+    
+    var getState: () -> State { get }
+}
+
+internal protocol ActionObserverType: AnyObject {
+    associatedtype Action
+    
     var action: AnyObserver<Action> { get }
+}
+
+internal protocol OutputObservableType: AnyObject {
+    associatedtype Output
+    
     var output: Observable<Output> { get }
     var bag: DisposeBag { get }
 }
 
-extension StoreType {
+extension StateObservableType {
     
     public func observeState(_ observer: @escaping (State) -> Void) {
         state
+            .asObservable()
             .observeOn(MainScheduler.instance)
             .subscribe(onNext: {
                 observer($0)
@@ -77,9 +90,25 @@ extension StoreType {
             .disposed(by: bag)
     }
     
+}
+
+extension StateStoreType {
+    
+    public var state: State {
+        return getState()
+    }
+    
+}
+
+extension ActionObserverType {
+    
     public func dispatchAction(_ action: Action) {
         self.action.onNext(action)
     }
+    
+}
+
+extension OutputObservableType {
     
     public func observeOutput(_ observer: @escaping (Output) -> Void) {
         output
@@ -93,14 +122,16 @@ extension StoreType {
 }
 
 public class AnyStore<State, Action, Output>: StoreType {
-    
+
     let state: Observable<State>
+    let getState: () -> State
     let action: AnyObserver<Action>
     let output: Observable<Output>
     let bag: DisposeBag
     
     internal init<Store: StoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
         self.state = store.state
+        self.getState = store.getState
         self.action = store.action
         self.output = store.output
         self.bag = store.bag
