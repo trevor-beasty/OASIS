@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol StoreDefinition {
+public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
     associatedtype Output
@@ -16,12 +16,12 @@ protocol StoreDefinition {
     typealias Store = AnyStore<State, Action, Output>
 }
 
-protocol ViewDefinition {
+public protocol ViewDefinition {
     associatedtype ViewState
     associatedtype ViewAction
 }
 
-protocol ViewType: AnyObject {
+public protocol ViewType: AnyObject {
     associatedtype Definition: ViewDefinition
     
     typealias ViewState = Definition.ViewState
@@ -32,7 +32,7 @@ protocol ViewType: AnyObject {
     func render(_ viewState: ViewState)
 }
 
-protocol ViewStoreType: AnyObject {
+public protocol ViewStoreType: AnyObject {
     associatedtype State
     associatedtype Action
     
@@ -42,7 +42,7 @@ protocol ViewStoreType: AnyObject {
     func dispatchAction(_ action: Action)
 }
 
-protocol ClientStoreType: AnyObject {
+public protocol ClientStoreType: AnyObject {
     associatedtype Action
     associatedtype Output
     
@@ -52,69 +52,69 @@ protocol ClientStoreType: AnyObject {
     func dispatchAction(_ action: Action)
 }
 
-protocol StoreType: ViewStoreType, ClientStoreType {}
+public protocol StoreType: ViewStoreType, ClientStoreType {}
 
-class AnyViewStore<State, Action>: ViewStoreType {
+public class AnyViewStore<State, Action>: ViewStoreType {
     
     private let _observeState: (@escaping (State) -> Void) -> Void
     private let _dispatchAction: (Action) -> Void
     
-    init<Store: ViewStoreType>(_ store: Store) where Store.State == State, Store.Action == Action {
+    internal init<Store: ViewStoreType>(_ store: Store) where Store.State == State, Store.Action == Action {
         _observeState = store.observeState
         _dispatchAction = store.dispatchAction
     }
     
-    func observeState(_ stateObserver: @escaping (State) -> Void) {
+    public func observeState(_ stateObserver: @escaping (State) -> Void) {
         _observeState(stateObserver)
     }
     
-    func dispatchAction(_ action: Action) {
+    public func dispatchAction(_ action: Action) {
         _dispatchAction(action)
     }
     
 }
 
-class AnyClientStore<Action, Output>: ClientStoreType {
+public class AnyClientStore<Action, Output>: ClientStoreType {
     
     private let _observeOutput: (@escaping (Output) -> Void) -> Void
     private let _dispatchAction: (Action) -> Void
     
-    init<Store: ClientStoreType>(_ store: Store) where Store.Action == Action, Store.Output == Output {
+    internal init<Store: ClientStoreType>(_ store: Store) where Store.Action == Action, Store.Output == Output {
         _observeOutput = store.observeOutput
         _dispatchAction = store.dispatchAction
     }
     
-    func observeOutput(_ outputObserver: @escaping (Output) -> Void) {
+    public func observeOutput(_ outputObserver: @escaping (Output) -> Void) {
         _observeOutput(outputObserver)
     }
     
-    func dispatchAction(_ action: Action) {
+    public func dispatchAction(_ action: Action) {
         _dispatchAction(action)
     }
     
 }
 
-class AnyStore<State, Action, Output>: StoreType {
+public class AnyStore<State, Action, Output>: StoreType {
     
     private let _observeState: (@escaping (State) -> Void) -> Void
     private let _observeOutput: (@escaping (Output) -> Void) -> Void
     private let _dispatchAction: (Action) -> Void
     
-    init<Store: StoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
+    internal init<Store: StoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
         _observeState = store.observeState
         _observeOutput = store.observeOutput
         _dispatchAction = store.dispatchAction
     }
     
-    func observeState(_ stateObserver: @escaping (State) -> Void) {
+    public func observeState(_ stateObserver: @escaping (State) -> Void) {
         _observeState(stateObserver)
     }
     
-    func observeOutput(_ outputObserver: @escaping (Output) -> Void) {
+    public func observeOutput(_ outputObserver: @escaping (Output) -> Void) {
         _observeOutput(outputObserver)
     }
     
-    func dispatchAction(_ action: Action) {
+    public func dispatchAction(_ action: Action) {
         _dispatchAction(action)
     }
     
@@ -122,7 +122,7 @@ class AnyStore<State, Action, Output>: StoreType {
 
 extension ViewStoreType {
     
-    func asViewStore() -> AnyViewStore<State, Action> {
+    public func asViewStore() -> AnyViewStore<State, Action> {
         return AnyViewStore(self)
     }
     
@@ -130,7 +130,7 @@ extension ViewStoreType {
 
 extension ClientStoreType {
     
-    func asClientStore() -> AnyClientStore<Action, Output> {
+    public func asClientStore() -> AnyClientStore<Action, Output> {
         return AnyClientStore(self)
     }
     
@@ -138,7 +138,7 @@ extension ClientStoreType {
 
 extension StoreType {
     
-    func asStore() -> AnyStore<State, Action, Output> {
+    public func asStore() -> AnyStore<State, Action, Output> {
         return AnyStore(self)
     }
     
