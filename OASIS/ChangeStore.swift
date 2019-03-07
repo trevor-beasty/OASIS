@@ -11,9 +11,9 @@ import RxSwift
 
 internal let abstractMethodMessage = "abstract method must be overriden by subclass"
 
-public protocol ChangeStoreDefinition: StoreDefinition {
-    associatedtype Change
-}
+//public protocol ChangeStoreDefinition: StoreDefinition {
+//    associatedtype Change
+//}
 
 open class ChangeStore<State, Change, Action, Output>: StoreType {
     
@@ -22,7 +22,7 @@ open class ChangeStore<State, Change, Action, Output>: StoreType {
     private let actionSubject = PublishSubject<Action>()
     private let outputSubject = PublishSubject<Output>()
     
-    private let bag = DisposeBag()
+    internal let bag = DisposeBag()
     
     public init(initialState: State) {
         self.stateVariable = Variable<State>(initialState)
@@ -35,7 +35,6 @@ open class ChangeStore<State, Change, Action, Output>: StoreType {
             .map({
                 return type(of: self).reduce(change: $0, state: self.stateVariable.value)
             })
-        // TODO: 'Push' sequence onto stateVariable? (Is it possible?) May need to change stateVariable Type.
             .subscribe(onNext: {
                 self.stateVariable.value = $0
             })
@@ -62,26 +61,8 @@ open class ChangeStore<State, Change, Action, Output>: StoreType {
         outputSubject.onNext(output)
     }
     
-    public func observeState(_ stateObserver: @escaping (State) -> Void) {
-        stateVariable.asObservable()
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: {
-                stateObserver($0)
-            })
-            .disposed(by: bag)
-    }
-    
-    public func dispatchAction(_ action: Action) {
-        actionSubject.onNext(action)
-    }
-    
-    public func observeOutput(_ outputObserver: @escaping (Output) -> Void) {
-        outputSubject.asObservable()
-            .observeOn(MainScheduler.instance)
-            .subscribe(onNext: {
-                outputObserver($0)
-            })
-            .disposed(by: bag)
-    }
+    internal var state: Observable<State> { return stateVariable.asObservable() }
+    internal var action: AnyObserver<Action> { return actionSubject.asObserver() }
+    internal var output: Observable<Output> { return outputSubject.asObservable() }
     
 }
