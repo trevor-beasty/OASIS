@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol Process: AnyObject {
+public protocol ProcessType: AnyObject {
     associatedtype Entity: StatefulEntity
     associatedtype LaunchArg
     associatedtype LaunchReturn

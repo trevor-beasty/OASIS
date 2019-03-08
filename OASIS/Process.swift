@@ -1,15 +1,15 @@
 //
-//  RootFlow.swift
+//  Process.swift
 //  OASIS
 //
 //  Created by Trevor Beasty on 3/8/19.
 //  Copyright © 2019 Trevor Beasty. All rights reserved.
 //
 
-import UIKit
+import Foundation
 import RxSwift
 
-public class RootFlow<Entity: StatefulEntity, LaunchArg, Output>: Process {
+public class Process<Entity: StatefulEntity, LaunchArg, LaunchReturn, Output>: ProcessType {
     
     public let entity: Entity
     private let outputSubject = PublishSubject<Output>()
@@ -19,7 +19,7 @@ public class RootFlow<Entity: StatefulEntity, LaunchArg, Output>: Process {
         self.entity = entity
     }
     
-    open func start(_ launchArg: LaunchArg) -> UIViewController {
+    open func start(_ launchArg: LaunchArg) -> LaunchReturn {
         fatalError(abstractMethodMessage)
     }
     
