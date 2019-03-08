@@ -20,3 +20,9 @@ public protocol Process: AnyObject {
 }
 
 public protocol StatefulEntity: AnyObject { }
+
+//public final class VoidEntity: StatefulEntity {
+//
+//    public init() { }
+//
+//}

@@ -1,5 +1,5 @@
 //
-//  Flow.swift
+//  RootFlow.swift
 //  OASIS
 //
 //  Created by Trevor Beasty on 3/8/19.
@@ -9,7 +9,7 @@
 import UIKit
 import RxSwift
 
-public class Flow<Entity: ScreenEntity, LaunchArg, Output>: ScreenProcess {
+public class RootFlow<Entity: StatefulEntity, LaunchArg, Output>: RootScreenProcess {
     
     public let entity: Entity
     private let outputSubject = PublishSubject<Output>()
@@ -19,7 +19,7 @@ public class Flow<Entity: ScreenEntity, LaunchArg, Output>: ScreenProcess {
         self.entity = entity
     }
     
-    open func start(_ launchArg: LaunchArg) -> () {
+    open func start(_ launchArg: LaunchArg) -> UIViewController {
         fatalError(abstractMethodMessage)
     }
     
