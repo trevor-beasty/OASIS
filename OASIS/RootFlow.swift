@@ -9,7 +9,7 @@
 import UIKit
 import RxSwift
 
-public class RootFlow<Entity: StatefulEntity, LaunchArg, Output>: RootScreenProcess {
+public class RootFlow<Entity: StatefulEntity, LaunchArg, Output>: Process {
     
     public let entity: Entity
     private let outputSubject = PublishSubject<Output>()

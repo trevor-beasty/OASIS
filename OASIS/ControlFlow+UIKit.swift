@@ -8,9 +8,9 @@
 
 import UIKit
 
-public protocol ScreenProcess: Process where Entity: ScreenEntity, LaunchReturn == Void { }
-
-public protocol RootScreenProcess: Process where LaunchReturn == UIViewController { }
+public protocol WindowEntity: StatefulEntity {
+    var window: UIWindow { get }
+}
 
 public protocol ScreenEntity: StatefulEntity {
     var rootScreenContext: ScreenContext { get }

@@ -9,7 +9,7 @@
 import UIKit
 import RxSwift
 
-public class Flow<Entity: ScreenEntity, LaunchArg, Output>: ScreenProcess {
+public class Flow<Entity: ScreenEntity, LaunchArg, Output>: Process  {
     
     public let entity: Entity
     private let outputSubject = PublishSubject<Output>()
