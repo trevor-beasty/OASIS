@@ -15,6 +15,10 @@
 		E2803C452231913000D0EE57 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2803C442231913000D0EE57 /* Types.swift */; };
 		E2803C472231952A00D0EE57 /* ChangeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2803C462231952A00D0EE57 /* ChangeStore.swift */; };
 		E2E02DD52231C457005ABAE9 /* StoreAdaptation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E02DD42231C457005ABAE9 /* StoreAdaptation.swift */; };
+		E2E02DD72232A802005ABAE9 /* ControlFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E02DD62232A802005ABAE9 /* ControlFlow.swift */; };
+		E2E02DD92232AFB6005ABAE9 /* ControlFlow+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E02DD82232AFB6005ABAE9 /* ControlFlow+UIKit.swift */; };
+		E2E02DDB2232B0A8005ABAE9 /* Flow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E02DDA2232B0A8005ABAE9 /* Flow.swift */; };
+		E2E02DDD2232B5EB005ABAE9 /* WindowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E02DDC2232B5EB005ABAE9 /* WindowCoordinator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +34,10 @@
 		E2803C442231913000D0EE57 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		E2803C462231952A00D0EE57 /* ChangeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeStore.swift; sourceTree = "<group>"; };
 		E2E02DD42231C457005ABAE9 /* StoreAdaptation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreAdaptation.swift; sourceTree = "<group>"; };
+		E2E02DD62232A802005ABAE9 /* ControlFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlFlow.swift; sourceTree = "<group>"; };
+		E2E02DD82232AFB6005ABAE9 /* ControlFlow+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ControlFlow+UIKit.swift"; sourceTree = "<group>"; };
+		E2E02DDA2232B0A8005ABAE9 /* Flow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Flow.swift; sourceTree = "<group>"; };
+		E2E02DDC2232B5EB005ABAE9 /* WindowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowCoordinator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,6 +86,10 @@
 				E2803C442231913000D0EE57 /* Types.swift */,
 				E2E02DD42231C457005ABAE9 /* StoreAdaptation.swift */,
 				E2803C462231952A00D0EE57 /* ChangeStore.swift */,
+				E2E02DD62232A802005ABAE9 /* ControlFlow.swift */,
+				E2E02DD82232AFB6005ABAE9 /* ControlFlow+UIKit.swift */,
+				E2E02DDA2232B0A8005ABAE9 /* Flow.swift */,
+				E2E02DDC2232B5EB005ABAE9 /* WindowCoordinator.swift */,
 				E207E47E222D761C002EB89B /* Main.storyboard */,
 				E207E481222D761F002EB89B /* Assets.xcassets */,
 				E207E483222D761F002EB89B /* LaunchScreen.storyboard */,
@@ -216,9 +228,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E2E02DDB2232B0A8005ABAE9 /* Flow.swift in Sources */,
 				E207E47B222D761C002EB89B /* AppDelegate.swift in Sources */,
+				E2E02DD72232A802005ABAE9 /* ControlFlow.swift in Sources */,
 				E2803C472231952A00D0EE57 /* ChangeStore.swift in Sources */,
 				E2E02DD52231C457005ABAE9 /* StoreAdaptation.swift in Sources */,
+				E2E02DD92232AFB6005ABAE9 /* ControlFlow+UIKit.swift in Sources */,
+				E2E02DDD2232B5EB005ABAE9 /* WindowCoordinator.swift in Sources */,
 				E2803C452231913000D0EE57 /* Types.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
