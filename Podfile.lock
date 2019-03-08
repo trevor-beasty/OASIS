@@ -1,9 +1,12 @@
 PODS:
+  - OASIS (0.0.1):
+    - RxSwift
   - RxAtomic (4.4.1)
   - RxSwift (4.4.1):
     - RxAtomic (~> 4.4)
 
 DEPENDENCIES:
+  - OASIS (from `./`)
   - RxSwift (~> 4.0)
 
 SPEC REPOS:
@@ -11,10 +14,15 @@ SPEC REPOS:
     - RxAtomic
     - RxSwift
 
+EXTERNAL SOURCES:
+  OASIS:
+    :path: "./"
+
 SPEC CHECKSUMS:
+  OASIS: 017b5d04fd6a777ed1ba4c9a7cb6aa31e774edf1
   RxAtomic: f8d6adc1ccb87a767811269e4875887bc74dbf19
   RxSwift: 92fcf68dfef21f3e2ab1965363d9e7b3d787597e
 
-PODFILE CHECKSUM: 3f0e7537cba2e65ae0518a41f4d16383b72f9e88
+PODFILE CHECKSUM: 611eff286dc25df7e1d3658142bd0aeba892dcd5
 
 COCOAPODS: 1.6.0

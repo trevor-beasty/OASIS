@@ -5,8 +5,9 @@ Pod::Spec.new do |spec|
   spec.license      = "Copyright © 2019 Weight Watchers International. All rights reserved."
   spec.author       = { "Trevor Beasty" => "trevor.beasty@weightwatchers.com" }
   spec.ios.deployment_target = '10.0'
-  s.swift_version   = '4.2'
+  spec.swift_version   = '4.2'
   spec.source       = { :git => "http://github.com/trevor-beasty/OASIS" }
   spec.source_files = 'Pod/Classes/**/*'
-  s.dependency 'RxSwift'
+  spec.dependency 'RxSwift'
+  spec.homepage     = "https://github.com/trevor-beasty/OASIS"
 end
