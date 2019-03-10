@@ -42,34 +42,33 @@ internal protocol ClientStoreType: StateStoreType, ActionObserverType, OutputObs
 internal protocol StateObservableType: AnyObject {
     associatedtype State
     
-    var state: Observable<State> { get }
+    var stateObservable: Observable<State> { get }
     var bag: DisposeBag { get }
 }
 
 internal protocol StateStoreType: AnyObject {
     associatedtype State
     
-    var getState: () -> State { get }
+    var state: () -> State { get }
 }
 
 internal protocol ActionObserverType: AnyObject {
     associatedtype Action
     
-    var action: AnyObserver<Action> { get }
+    var actionObserver: AnyObserver<Action> { get }
 }
 
 internal protocol OutputObservableType: AnyObject {
     associatedtype Output
     
-    var output: Observable<Output> { get }
+    var outputObservable: Observable<Output> { get }
     var bag: DisposeBag { get }
 }
 
 extension StateObservableType {
     
     public func observeState(_ observer: @escaping (State) -> Void) {
-        state
-            .asObservable()
+        stateObservable
             .observeOn(MainScheduler.instance)
             .subscribe(onNext: {
                 observer($0)
@@ -79,18 +78,10 @@ extension StateObservableType {
     
 }
 
-extension StateStoreType {
-    
-    public var state: State {
-        return getState()
-    }
-    
-}
-
 extension ActionObserverType {
     
     public func dispatchAction(_ action: Action) {
-        self.action.onNext(action)
+        self.actionObserver.onNext(action)
     }
     
 }
@@ -98,7 +89,7 @@ extension ActionObserverType {
 extension OutputObservableType {
     
     public func observeOutput(_ observer: @escaping (Output) -> Void) {
-        output
+        outputObservable
             .observeOn(MainScheduler.instance)
             .subscribe(onNext: {
                 observer($0)
@@ -110,19 +101,19 @@ extension OutputObservableType {
 
 public class AnyStore<State, Action, Output>: StoreType {
 
-    let state: Observable<State>
-    let getState: () -> State
-    let action: AnyObserver<Action>
-    let output: Observable<Output>
+    let stateObservable: Observable<State>
+    let state: () -> State
+    let actionObserver: AnyObserver<Action>
+    let outputObservable: Observable<Output>
     let bag: DisposeBag
     
     private let store: AnyObject
     
     internal init<Store: StoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
         self.state = store.state
-        self.getState = store.getState
-        self.action = store.action
-        self.output = store.output
+        self.stateObservable = store.stateObservable
+        self.actionObserver = store.actionObserver
+        self.outputObservable = store.outputObservable
         self.bag = store.bag
         self.store = store
     }
@@ -131,17 +122,17 @@ public class AnyStore<State, Action, Output>: StoreType {
 
 public class AnyViewStore<State, Action>: ViewStoreType {
     
-    let state: Observable<State>
-    let getState: () -> State
-    let action: AnyObserver<Action>
+    let stateObservable: Observable<State>
+    let state: () -> State
+    let actionObserver: AnyObserver<Action>
     let bag: DisposeBag
     
     private let store: AnyObject
     
     internal init<Store: ViewStoreType>(_ store: Store) where Store.State == State, Store.Action == Action {
         self.state = store.state
-        self.getState = store.getState
-        self.action = store.action
+        self.stateObservable = store.stateObservable
+        self.actionObserver = store.actionObserver
         self.bag = store.bag
         self.store = store
     }
@@ -150,17 +141,17 @@ public class AnyViewStore<State, Action>: ViewStoreType {
 
 public class AnyClientStore<State, Action, Output>: ClientStoreType {
     
-    let getState: () -> State
-    let action: AnyObserver<Action>
-    let output: Observable<Output>
+    let state: () -> State
+    let actionObserver: AnyObserver<Action>
+    let outputObservable: Observable<Output>
     let bag: DisposeBag
     
     private let store: AnyObject
     
     internal init<Store: ClientStoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
-        self.getState = store.getState
-        self.action = store.action
-        self.output = store.output
+        self.state = store.state
+        self.actionObserver = store.actionObserver
+        self.outputObservable = store.outputObservable
         self.bag = store.bag
         self.store = store
     }
