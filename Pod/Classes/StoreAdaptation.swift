@@ -9,7 +9,9 @@
 import Foundation
 import RxSwift
 
-internal class ViewStoreAdapter<Store: StoreType, View: ViewType>: ViewStoreType {
+internal class ViewStoreAdapter<Store: _StoreType, View: ViewType>: _ViewStoreType {
+    typealias State = View.ViewState
+    typealias Action = View.ViewAction
     
     let stateObservable: Observable<View.ViewState>
     let getState: () -> View.ViewState
@@ -37,23 +39,6 @@ internal class ViewStoreAdapter<Store: StoreType, View: ViewType>: ViewStoreType
             })
             .disposed(by: store.bag)
         
-    }
-    
-}
-
-extension StoreType {
-    
-    public func adaptTo<View: ViewType>(_ viewType: View.Type, stateMap: @escaping (State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Action) -> AnyViewStore<View.ViewState, View.ViewAction> {
-        return ViewStoreAdapter(self, viewType: viewType, stateMap: stateMap, actionMap: actionMap)
-            .asViewStore()
-    }
-    
-    public func adaptTo<View: ViewType>(_ viewType: View.Type, stateMap: @escaping (State) -> View.ViewState) -> AnyViewStore<View.ViewState, View.ViewAction> where View.ViewAction == Action {
-        return adaptTo(viewType, stateMap: stateMap, actionMap: { viewAction in return viewAction })
-    }
-
-    public func adaptTo<View: ViewType>(_ viewType: View.Type, actionMap: @escaping (View.ViewAction) -> Action) -> AnyViewStore<View.ViewState, View.ViewAction> where View.ViewState == State {
-        return adaptTo(viewType, stateMap: { state in return state }, actionMap: actionMap)
     }
     
 }
