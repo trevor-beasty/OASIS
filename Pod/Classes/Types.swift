@@ -33,39 +33,63 @@ public protocol ViewType: AnyObject {
     func render(_ viewState: ViewState)
 }
 
-internal protocol StoreType: StateObservableType, StateStoreType, ActionObserverType, OutputObservableType { }
+public protocol StoreType: StateObservableType, StateStoreType, ActionObserverType, OutputObservableType {
+    func asStore() -> AnyStore<State, Action, Output>
+}
 
-internal protocol ViewStoreType: StateObservableType, StateStoreType, ActionObserverType { }
+internal protocol _StoreType: StoreType, _StateObservableType, _ActionObserverType, _OutputObservableType  { }
 
-internal protocol ClientStoreType: StateStoreType, ActionObserverType, OutputObservableType { }
+public protocol ViewStoreType: StateObservableType, StateStoreType, ActionObserverType {
+    func asViewStore() -> AnyViewStore<State, Action>
+}
 
-internal protocol StateObservableType: AnyObject {
+internal protocol _ViewStoreType: ViewStoreType, _StateObservableType, _ActionObserverType { }
+
+public protocol ClientStoreType: StateStoreType, ActionObserverType, OutputObservableType {
+    func asClientStore() -> AnyClientStore<State, Action, Output>
+}
+
+internal protocol _ClientStoreType: ClientStoreType, _ActionObserverType, _OutputObservableType { }
+
+public protocol StateObservableType: AnyObject {
     associatedtype State
     
+    func observeState(_ observer: @escaping (State) -> Void)
+}
+
+internal protocol _StateObservableType: StateObservableType {
     var stateObservable: Observable<State> { get }
     var bag: DisposeBag { get }
 }
 
-internal protocol StateStoreType: AnyObject {
+public protocol StateStoreType: AnyObject {
     associatedtype State
     
-    var state: () -> State { get }
+    var getState: () -> State { get }
 }
 
-internal protocol ActionObserverType: AnyObject {
+public protocol ActionObserverType: AnyObject {
     associatedtype Action
     
+    func dispatchAction(_ action: Action)
+}
+
+internal protocol _ActionObserverType: ActionObserverType {
     var actionObserver: AnyObserver<Action> { get }
 }
 
-internal protocol OutputObservableType: AnyObject {
+public protocol OutputObservableType: AnyObject {
     associatedtype Output
     
+    func observeOutput(_ observer: @escaping (Output) -> Void)
+}
+
+internal protocol _OutputObservableType: OutputObservableType {
     var outputObservable: Observable<Output> { get }
     var bag: DisposeBag { get }
 }
 
-extension StateObservableType {
+extension _StateObservableType {
     
     public func observeState(_ observer: @escaping (State) -> Void) {
         stateObservable
@@ -78,7 +102,15 @@ extension StateObservableType {
     
 }
 
-extension ActionObserverType {
+extension StateStoreType {
+    
+    public var state: State {
+        return getState()
+    }
+    
+}
+
+extension _ActionObserverType {
     
     public func dispatchAction(_ action: Action) {
         self.actionObserver.onNext(action)
@@ -86,7 +118,7 @@ extension ActionObserverType {
     
 }
 
-extension OutputObservableType {
+extension _OutputObservableType {
     
     public func observeOutput(_ observer: @escaping (Output) -> Void) {
         outputObservable
@@ -99,18 +131,18 @@ extension OutputObservableType {
     
 }
 
-public class AnyStore<State, Action, Output>: StoreType {
+public class AnyStore<State, Action, Output>: _StoreType {
 
     let stateObservable: Observable<State>
-    let state: () -> State
+    public let getState: () -> State
     let actionObserver: AnyObserver<Action>
     let outputObservable: Observable<Output>
     let bag: DisposeBag
     
     private let store: AnyObject
     
-    internal init<Store: StoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
-        self.state = store.state
+    internal init<Store: _StoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
+        self.getState = store.getState
         self.stateObservable = store.stateObservable
         self.actionObserver = store.actionObserver
         self.outputObservable = store.outputObservable
@@ -120,17 +152,17 @@ public class AnyStore<State, Action, Output>: StoreType {
     
 }
 
-public class AnyViewStore<State, Action>: ViewStoreType {
+public class AnyViewStore<State, Action>: _ViewStoreType {
     
     let stateObservable: Observable<State>
-    let state: () -> State
+    public let getState: () -> State
     let actionObserver: AnyObserver<Action>
     let bag: DisposeBag
     
     private let store: AnyObject
     
-    internal init<Store: ViewStoreType>(_ store: Store) where Store.State == State, Store.Action == Action {
-        self.state = store.state
+    internal init<Store: _ViewStoreType>(_ store: Store) where Store.State == State, Store.Action == Action {
+        self.getState = store.getState
         self.stateObservable = store.stateObservable
         self.actionObserver = store.actionObserver
         self.bag = store.bag
@@ -139,17 +171,17 @@ public class AnyViewStore<State, Action>: ViewStoreType {
     
 }
 
-public class AnyClientStore<State, Action, Output>: ClientStoreType {
+public class AnyClientStore<State, Action, Output>: _ClientStoreType {
     
-    let state: () -> State
+    public let getState: () -> State
     let actionObserver: AnyObserver<Action>
     let outputObservable: Observable<Output>
     let bag: DisposeBag
     
     private let store: AnyObject
     
-    internal init<Store: ClientStoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
-        self.state = store.state
+    internal init<Store: _ClientStoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
+        self.getState = store.getState
         self.actionObserver = store.actionObserver
         self.outputObservable = store.outputObservable
         self.bag = store.bag
@@ -158,7 +190,7 @@ public class AnyClientStore<State, Action, Output>: ClientStoreType {
     
 }
 
-extension StoreType {
+extension _StoreType {
 
     public func asStore() -> AnyStore<State, Action, Output> {
         return AnyStore(self)
@@ -166,7 +198,7 @@ extension StoreType {
 
 }
 
-extension ViewStoreType {
+extension _ViewStoreType {
     
     public func asViewStore() -> AnyViewStore<State, Action> {
         return AnyViewStore(self)
@@ -174,7 +206,7 @@ extension ViewStoreType {
     
 }
 
-extension ClientStoreType {
+extension _ClientStoreType {
     
     public func asClientStore() -> AnyClientStore<State, Action, Output> {
         return AnyClientStore(self)

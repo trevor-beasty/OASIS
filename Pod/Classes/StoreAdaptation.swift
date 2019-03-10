@@ -11,17 +11,16 @@ import RxSwift
 
 internal class ViewStoreAdapter<Store: StoreType, View: ViewType>: ViewStoreType {
     
-    let state: Observable<View.ViewState>
+    let stateObservable: Observable<View.ViewState>
     let getState: () -> View.ViewState
     private let viewActionSubject = PublishSubject<View.ViewAction>()
     let bag: DisposeBag
     
-    var action: AnyObserver<View.ViewAction> { return viewActionSubject.asObserver() }
+    var actionObserver: AnyObserver<View.ViewAction> { return viewActionSubject.asObserver() }
     
     init(_ store: Store, viewType: View.Type, stateMap: @escaping (Store.State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Store.Action) {
         
-        self.state = store.state
-            .asObservable()
+        self.stateObservable = store.stateObservable
             .map({ return stateMap($0) })
         
         self.getState = {
@@ -34,7 +33,7 @@ internal class ViewStoreAdapter<Store: StoreType, View: ViewType>: ViewStoreType
             .asObservable()
             .map({ return actionMap($0) })
             .subscribe(onNext: {
-                store.action.onNext($0)
+                store.actionObserver.onNext($0)
             })
             .disposed(by: store.bag)
         

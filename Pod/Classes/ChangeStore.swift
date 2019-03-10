@@ -15,7 +15,7 @@ public protocol ChangeStoreDefinition: StoreDefinition {
     associatedtype Change
 }
 
-open class ChangeStore<Definition: ChangeStoreDefinition>: StoreType {
+open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
     public typealias State = Definition.State
     public typealias Change = Definition.Change
     public typealias Action = Definition.Action
@@ -67,7 +67,7 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: StoreType {
     
     internal var stateObservable: Observable<State> { return stateVariable.asObservable() }
     
-    internal var state: () -> State {
+    public var getState: () -> State {
         
         return { [stateVariable] in
             return stateVariable.value
