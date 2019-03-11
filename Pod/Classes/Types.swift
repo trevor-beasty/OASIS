@@ -22,6 +22,8 @@ public protocol ViewDefinition {
     associatedtype ViewAction
 }
 
+// TODO: Rename to something like StateRepresentableType.
+// TODO: Give new and old state for efficient rendering / animation purposes.
 public protocol ViewType: AnyObject {
     associatedtype Definition: ViewDefinition
 

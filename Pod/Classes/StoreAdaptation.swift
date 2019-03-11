@@ -18,6 +18,8 @@ internal class ViewStoreAdapter<Store: _StoreType, View: ViewType>: _ViewStoreTy
     private let viewActionSubject = PublishSubject<View.ViewAction>()
     let bag: DisposeBag
     
+    private let store: AnyObject
+    
     var actionObserver: AnyObserver<View.ViewAction> { return viewActionSubject.asObserver() }
     
     init(_ store: Store, viewType: View.Type, stateMap: @escaping (Store.State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Store.Action) {
@@ -30,6 +32,7 @@ internal class ViewStoreAdapter<Store: _StoreType, View: ViewType>: _ViewStoreTy
         }
         
         self.bag = store.bag
+        self.store = store
         
         viewActionSubject
             .asObservable()
