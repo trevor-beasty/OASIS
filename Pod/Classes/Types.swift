@@ -35,12 +35,12 @@ public protocol ViewType: AnyObject {
     func render(_ viewState: ViewState)
 }
 
-public protocol StoreType: StateObservableType, StateStoreType, ActionObserverType, OutputObservableType {
+public protocol StoreType: ViewStoreType, ClientStoreType {
     func asStore() -> AnyStore<State, Action, Output>
     func adaptTo<View: ViewType>(_ viewType: View.Type, stateMap: @escaping (State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Action) -> AnyViewStore<View.ViewState, View.ViewAction>
 }
 
-internal protocol _StoreType: StoreType, _StateObservableType, _ActionObserverType, _OutputObservableType  { }
+internal protocol _StoreType: StoreType, _ViewStoreType, _ClientStoreType  { }
 
 public protocol ViewStoreType: StateObservableType, StateStoreType, ActionObserverType {
     func asViewStore() -> AnyViewStore<State, Action>
