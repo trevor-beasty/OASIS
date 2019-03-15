@@ -29,6 +29,8 @@ import RxSwift
 
 // TODO: Allow testing clients to pass in initialState in initializer.
 
+// TODO: Empty state analog? (state when fresh prior to network request)
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
