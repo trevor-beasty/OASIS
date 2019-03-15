@@ -33,6 +33,8 @@ import RxSwift
 
 // TODO: Apply operators to individual Action cases (ex. filter out rapid button taps)
 
+// TODO: Not all ViewAction's must have a mapped StoreAction.
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
