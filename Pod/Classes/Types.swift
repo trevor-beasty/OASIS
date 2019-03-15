@@ -14,6 +14,13 @@ import RxSwift
 // top-level ViewState to lower level component views. This would probably just involve discretizing the render(:) function and the notion of ViewState.
 // Lower-level views may not necessarily participate explicity (via the type system) in Action propogation.
 
+// TODO: Convenience for mapping relationships between StoreType and ViewType. Could then provide utilities for creating views relative to a store, providing
+// a slimmer API than adaptTo() currently provides.
+
+// TODO: Flow as a transitive container. For the stores it owns, flow maps Outputs to Actions across stores. For signals for which it is not responsible, it merely
+// propogates those signals as its own Output, in an analogous fashion to Stores. This is a universal modularity concept - define what you are responsible for
+// and leave all other handling up to some unknown client.
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
