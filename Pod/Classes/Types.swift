@@ -31,6 +31,8 @@ import RxSwift
 
 // TODO: Empty state analog? (state when fresh prior to network request)
 
+// TODO: Apply operators to individual Action cases (ex. filter out rapid button taps)
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
