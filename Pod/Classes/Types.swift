@@ -21,6 +21,12 @@ import RxSwift
 // propogates those signals as its own Output, in an analogous fashion to Stores. This is a universal modularity concept - define what you are responsible for
 // and leave all other handling up to some unknown client.
 
+// TODO: The Output concept should be semantically defined as a Module. A module executes some private behavior internally, and propogates outwards all signals unrelated
+// to that behavior. (re-purpose OutputObservableType)
+
+// TODO: It may be uncalled for to model flow outside of a screen context - I have mostly screen context right now. That said, I can define a ScreenFlow concept.
+// This would be a Module that is provided with some stateful artifact such that it can create side effects in the navigation hierarchy.
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
