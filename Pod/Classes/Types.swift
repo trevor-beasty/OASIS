@@ -27,6 +27,8 @@ import RxSwift
 // TODO: It may be uncalled for to model flow outside of a screen context - I have mostly screen context right now. That said, I can define a ScreenFlow concept.
 // This would be a Module that is provided with some stateful artifact such that it can create side effects in the navigation hierarchy.
 
+// TODO: Allow testing clients to pass in initialState in initializer.
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
