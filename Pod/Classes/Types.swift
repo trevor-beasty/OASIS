@@ -237,3 +237,13 @@ extension StoreType {
     }
     
 }
+
+extension ViewType {
+    
+    public func bind(to store: Store) {
+        store.observeState({ [weak self] viewState in
+            self?.render(viewState)
+        })
+    }
+    
+}
