@@ -9,6 +9,11 @@
 import Foundation
 import RxSwift
 
+// TODO: Amongst views, a top level view which owns a store should be distinguished from lower-level component view which are really just utilities.
+// While these lower-level store should be store agnostic, it would be nice to provide a type definition / api the demonstrates the cascading of
+// top-level ViewState to lower level component views. This would probably just involve discretizing the render(:) function and the notion of ViewState.
+// Lower-level views may not necessarily participate explicity (via the type system) in Action propogation.
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
