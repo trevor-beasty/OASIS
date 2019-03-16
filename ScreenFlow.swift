@@ -14,6 +14,8 @@ open class ScreenFlow<Output>: _OutputObservableType {
     
     internal let bag = DisposeBag()
     
+    public init() { }
+    
     var outputObservable: Observable<Output> { return outputSubject.asObservable() }
     
     public func dispatchOutput(_ output: Output) {
