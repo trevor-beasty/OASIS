@@ -35,6 +35,8 @@ import RxSwift
 
 // TODO: Not all ViewAction's must have a mapped StoreAction.
 
+// TODO: Move in 'resource binding'
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
