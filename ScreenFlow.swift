@@ -8,6 +8,8 @@
 import Foundation
 import RxSwift
 
+public enum None { }
+
 open class ScreenFlow<Output>: _OutputObservableType {
     
     private let outputSubject = PublishSubject<Output>()
@@ -16,7 +18,7 @@ open class ScreenFlow<Output>: _OutputObservableType {
     
     public init() { }
     
-    open func start() {
+    open func start(in context: ScreenFlowContext) {
         fatalError(abstractMethodMessage)
     }
     
