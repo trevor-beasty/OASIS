@@ -16,6 +16,10 @@ open class ScreenFlow<Output>: _OutputObservableType {
     
     public init() { }
     
+    open func start() {
+        fatalError(abstractMethodMessage)
+    }
+    
     var outputObservable: Observable<Output> { return outputSubject.asObservable() }
     
     public func dispatchOutput(_ output: Output) {
