@@ -22,7 +22,7 @@ internal class ViewStoreAdapter<Store: _StoreType, View: ViewType>: _ViewStoreTy
     
     var actionObserver: AnyObserver<View.ViewAction> { return viewActionSubject.asObserver() }
     
-    init(_ store: Store, viewType: View.Type, stateMap: @escaping (Store.State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Store.Action) {
+    init(_ store: Store, viewType: View.Type, stateMap: @escaping (Store.State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Store.Action?) {
         
         self.stateObservable = store.stateObservable
             .map({ return stateMap($0) })
@@ -36,9 +36,12 @@ internal class ViewStoreAdapter<Store: _StoreType, View: ViewType>: _ViewStoreTy
         
         viewActionSubject
             .asObservable()
+            // TODO: There must be an operator that like compactMap
             .map({ return actionMap($0) })
             .subscribe(onNext: {
-                store.actionObserver.onNext($0)
+                if let storeAction = $0 {
+                    store.actionObserver.onNext(storeAction)
+                }
             })
             .disposed(by: store.bag)
         

@@ -65,7 +65,7 @@ public protocol ViewType: AnyObject {
 
 public protocol StoreType: ViewStoreType, ClientStoreType {
     func asStore() -> AnyStore<State, Action, Output>
-    func adaptTo<View: ViewType>(_ viewType: View.Type, stateMap: @escaping (State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Action) -> AnyViewStore<View.ViewState, View.ViewAction>
+    func adaptTo<View: ViewType>(_ viewType: View.Type, stateMap: @escaping (State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Action?) -> AnyViewStore<View.ViewState, View.ViewAction>
 }
 
 internal protocol _StoreType: StoreType, _ViewStoreType, _ClientStoreType  { }
@@ -247,7 +247,7 @@ extension _ClientStoreType {
 
 extension _StoreType {
     
-    public func adaptTo<View: ViewType>(_ viewType: View.Type, stateMap: @escaping (State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Action) -> AnyViewStore<View.ViewState, View.ViewAction> {
+    public func adaptTo<View: ViewType>(_ viewType: View.Type, stateMap: @escaping (State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Action?) -> AnyViewStore<View.ViewState, View.ViewAction> {
         return ViewStoreAdapter(self, viewType: viewType, stateMap: stateMap, actionMap: actionMap)
             .asViewStore()
     }
@@ -260,7 +260,7 @@ extension StoreType {
         return adaptTo(viewType, stateMap: stateMap, actionMap: { viewAction in return viewAction })
     }
     
-    public func adaptTo<View: ViewType>(_ viewType: View.Type, actionMap: @escaping (View.ViewAction) -> Action) -> AnyViewStore<View.ViewState, View.ViewAction> where View.ViewState == State {
+    public func adaptTo<View: ViewType>(_ viewType: View.Type, actionMap: @escaping (View.ViewAction) -> Action?) -> AnyViewStore<View.ViewState, View.ViewAction> where View.ViewState == State {
         return adaptTo(viewType, stateMap: { state in return state }, actionMap: actionMap)
     }
     
