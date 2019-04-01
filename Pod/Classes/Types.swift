@@ -50,24 +50,18 @@ public protocol ViewType: AnyObject {
     func render(_ viewState: ViewState)
 }
 
-public protocol StoreType: ViewStoreType, ClientStoreType {
+public protocol StoreType: ViewStoreType, OutputObservableType {
     func asStore() -> AnyStore<State, Action, Output>
     func adaptTo<View: ViewType>(_ viewType: View.Type, stateMap: @escaping (State) -> View.ViewState, actionMap: @escaping (View.ViewAction) -> Action?) -> AnyViewStore<View.ViewState, View.ViewAction>
 }
 
-internal protocol _StoreType: StoreType, _ViewStoreType, _ClientStoreType  { }
+internal protocol _StoreType: StoreType, _ViewStoreType, _OutputObservableType  { }
 
 public protocol ViewStoreType: StateObservableType, StateStoreType, ActionObserverType {
     func asViewStore() -> AnyViewStore<State, Action>
 }
 
 internal protocol _ViewStoreType: ViewStoreType, _StateObservableType, _ActionObserverType { }
-
-public protocol ClientStoreType: StateStoreType, ActionObserverType, OutputObservableType {
-    func asClientStore() -> AnyClientStore<State, Action, Output>
-}
-
-internal protocol _ClientStoreType: ClientStoreType, _ActionObserverType, _OutputObservableType { }
 
 public protocol StateObservableType: AnyObject {
     associatedtype State
@@ -189,25 +183,6 @@ public class AnyViewStore<State, Action>: _ViewStoreType {
     
 }
 
-public class AnyClientStore<State, Action, Output>: _ClientStoreType {
-    
-    public let getState: () -> State
-    let actionObserver: AnyObserver<Action>
-    let outputObservable: Observable<Output>
-    let bag: DisposeBag
-    
-    private let store: AnyObject
-    
-    internal init<Store: _ClientStoreType>(_ store: Store) where Store.State == State, Store.Action == Action, Store.Output == Output {
-        self.getState = store.getState
-        self.actionObserver = store.actionObserver
-        self.outputObservable = store.outputObservable
-        self.bag = store.bag
-        self.store = store
-    }
-    
-}
-
 extension _StoreType {
 
     public func asStore() -> AnyStore<State, Action, Output> {
@@ -220,14 +195,6 @@ extension _ViewStoreType {
     
     public func asViewStore() -> AnyViewStore<State, Action> {
         return AnyViewStore(self)
-    }
-    
-}
-
-extension _ClientStoreType {
-    
-    public func asClientStore() -> AnyClientStore<State, Action, Output> {
-        return AnyClientStore(self)
     }
     
 }
