@@ -14,28 +14,15 @@ import RxSwift
 // top-level ViewState to lower level component views. This would probably just involve discretizing the render(:) function and the notion of ViewState.
 // Lower-level views may not necessarily participate explicity (via the type system) in Action propogation.
 
-// TODO: Convenience for mapping relationships between StoreType and ViewType. Could then provide utilities for creating views relative to a store, providing
-// a slimmer API than adaptTo() currently provides.
-
-// TODO: Flow as a transitive container. For the stores it owns, flow maps Outputs to Actions across stores. For signals for which it is not responsible, it merely
-// propogates those signals as its own Output, in an analogous fashion to Stores. This is a universal modularity concept - define what you are responsible for
-// and leave all other handling up to some unknown client.
-
-// TODO: The Output concept should be semantically defined as a Module. A module executes some private behavior internally, and propogates outwards all signals unrelated
-// to that behavior. (re-purpose OutputObservableType)
-
-// TODO: It may be uncalled for to model flow outside of a screen context - I have mostly screen context right now. That said, I can define a ScreenFlow concept.
-// This would be a Module that is provided with some stateful artifact such that it can create side effects in the navigation hierarchy.
-
 // TODO: Allow testing clients to pass in initialState in initializer.
 
 // TODO: Empty state analog? (state when fresh prior to network request)
 
 // TODO: Apply operators to individual Action cases (ex. filter out rapid button taps)
 
-// TODO: Not all ViewAction's must have a mapped StoreAction.
+// TODO: Animations?
 
-// TODO: Move in 'resource binding'
+// TODO: Efficient updates (ex. inserting element into table)
 
 public protocol StoreDefinition {
     associatedtype State
