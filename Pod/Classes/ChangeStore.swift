@@ -22,30 +22,23 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
     public typealias Output = Definition.Output
     
     private let stateVariable: Variable<State>
-    private let changeSubject = PublishSubject<Change>()
     private let actionSubject = PublishSubject<Action>()
     private let outputSubject = PublishSubject<Output>()
     
     internal let bag = DisposeBag()
     
-    public init(initialState: State) {
+    private let qos: DispatchQoS
+    
+    public init(initialState: State, qos: DispatchQoS = .userInitiated) {
         self.stateVariable = Variable<State>(initialState)
+        self.qos = qos
         setUp()
     }
     
     private func setUp() {
         
-        changeSubject.asObservable()
-            .map({
-                return type(of: self).reduce(change: $0, state: self.stateVariable.value)
-            })
-            .subscribe(onNext: {
-                self.stateVariable.value = $0
-            })
-            .disposed(by: bag)
-        
         actionSubject.asObservable()
-            .observeOn(SerialDispatchQueueScheduler(qos: .userInitiated))
+            .observeOn(SerialDispatchQueueScheduler(qos: qos))
             .subscribe(onNext: {
                 self.handleAction($0)
             })
@@ -58,7 +51,15 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
     open class func reduce(change: Change, state: State) -> State { fatalError(abstractMethodMessage) }
     
     public func dispatchChange(_ change: Change) {
-        changeSubject.onNext(change)
+        let newState = type(of: self).reduce(change: change, state: stateVariable.value)
+        stateVariable.value = newState
+    }
+    
+    public func dispatchBatchChanges(_ changes: [Change]) {
+        let newState = changes.reduce(stateVariable.value) { (lastState, nextChange) -> State in
+            return type(of: self).reduce(change: nextChange, state: lastState)
+        }
+        stateVariable.value = newState
     }
     
     public func dispatchOutput(_ output: Output) {
