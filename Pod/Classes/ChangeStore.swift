@@ -54,15 +54,20 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
     
     // TODO: Should be making sure this occurs on specified qos - could send a change following a network request, which could dictate a different qos.
     // Need to check that adjacent, synchronous changes produce the expected result - expect first change to be fully processed before next change begins.
+    
+    // Dispatched changes must block the current thread (via 'sync'). This is b/c we must guarantee that the dispatched change updates the store state before the store attempts to
+    // access that state. Without this, a client that dispatches a change and then immediately reads the state will not see the change reflected in that state. It is safe
+    // to block the executing thread b/c we know that we are not on the main thread. Blocking via 'sync' is only delaying the data processing control flow thread. We know we are
+    // on some background thread (as defined by qos property) b/c all actions are immediately dispatched to this queue.
     public func dispatchChange(_ change: Change) {
-        changeQueue.async {
+        changeQueue.sync {
             let newState = type(of: self).reduce(change: change, state: self.stateVariable.value)
             self.stateVariable.value = newState
         }
     }
     
     public func dispatchBatchChanges(_ changes: [Change]) {
-        changeQueue.async {
+        changeQueue.sync {
             let newState = changes.reduce(self.stateVariable.value) { (lastState, nextChange) -> State in
                 return type(of: self).reduce(change: nextChange, state: lastState)
             }
