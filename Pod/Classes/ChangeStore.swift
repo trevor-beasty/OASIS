@@ -28,6 +28,8 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
     internal let bag = DisposeBag()
     
     private let qos: DispatchQoS
+    // Linear queue which ensures sequential change processing. It is important the one change finishes processing (creating new state) before the next begins processing.
+    private lazy var changeQueue = DispatchQueue(label: "ChangeQueue", qos: qos)
     
     public init(initialState: State, qos: DispatchQoS = .userInitiated) {
         self.stateVariable = Variable<State>(initialState)
@@ -50,16 +52,22 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
     
     open class func reduce(change: Change, state: State) -> State { fatalError(abstractMethodMessage) }
     
+    // TODO: Should be making sure this occurs on specified qos - could send a change following a network request, which could dictate a different qos.
+    // Need to check that adjacent, synchronous changes produce the expected result - expect first change to be fully processed before next change begins.
     public func dispatchChange(_ change: Change) {
-        let newState = type(of: self).reduce(change: change, state: stateVariable.value)
-        stateVariable.value = newState
+        changeQueue.async {
+            let newState = type(of: self).reduce(change: change, state: self.stateVariable.value)
+            self.stateVariable.value = newState
+        }
     }
     
     public func dispatchBatchChanges(_ changes: [Change]) {
-        let newState = changes.reduce(stateVariable.value) { (lastState, nextChange) -> State in
-            return type(of: self).reduce(change: nextChange, state: lastState)
+        changeQueue.async {
+            let newState = changes.reduce(self.stateVariable.value) { (lastState, nextChange) -> State in
+                return type(of: self).reduce(change: nextChange, state: lastState)
+            }
+            self.stateVariable.value = newState
         }
-        stateVariable.value = newState
     }
     
     public func dispatchOutput(_ output: Output) {
