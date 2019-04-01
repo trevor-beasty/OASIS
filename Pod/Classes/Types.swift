@@ -24,6 +24,8 @@ import RxSwift
 
 // TODO: Efficient updates (ex. inserting element into table)
 
+// TODO: Give current state to output observer so they don't need to reference the store separately.
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
