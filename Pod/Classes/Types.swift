@@ -26,6 +26,8 @@ import RxSwift
 
 // TODO: Give current state to output observer so they don't need to reference the store separately.
 
+// TODO: Require mapping of ViewAction to Action to always return a value; Stores must ignore unneeded actions. Helps avoid gross mapping functions / duplicity.
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
