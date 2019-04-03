@@ -28,6 +28,8 @@ import RxSwift
 
 // TODO: Require mapping of ViewAction to Action to always return a value; Stores must ignore unneeded actions. Helps avoid gross mapping functions / duplicity.
 
+// TODO: Module container for transitioning screens into a flow pattern.
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
