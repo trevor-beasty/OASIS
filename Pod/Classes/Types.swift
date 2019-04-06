@@ -30,6 +30,10 @@ import RxSwift
 
 // TODO: Module container for transitioning screens into a flow pattern.
 
+// TODO: GET RID OF VIEWACTION -
+// 1) It should be tested that stores respond to significant actions.. no need to avoid 'default' case
+// 2) mapping of ViewAction's into Action's is gross and adds no value, causes duplication in some cases
+
 public protocol StoreDefinition {
     associatedtype State
     associatedtype Action
