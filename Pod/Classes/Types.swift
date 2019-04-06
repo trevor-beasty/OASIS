@@ -33,6 +33,7 @@ import RxSwift
 // TODO: GET RID OF VIEWACTION -
 // 1) It should be tested that stores respond to significant actions.. no need to avoid 'default' case
 // 2) mapping of ViewAction's into Action's is gross and adds no value, causes duplication in some cases
+// ... but actually View is not reusable without this.. what is this sense of reusability and do we need it?
 
 public protocol StoreDefinition {
     associatedtype State
