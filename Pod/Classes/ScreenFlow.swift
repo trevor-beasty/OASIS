@@ -16,4 +16,10 @@ open class ScreenFlow<Output>: Module<None, Output> {
         fatalError(abstractMethodMessage)
     }
     
+    public typealias InvokeStart = () -> Void
+    
+    open func createStatic() -> (UIViewController, InvokeStart) {
+        fatalError(abstractMethodMessage)
+    }
+    
 }
