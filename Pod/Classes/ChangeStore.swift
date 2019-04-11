@@ -15,7 +15,7 @@ public protocol ChangeStoreDefinition: StoreDefinition {
     associatedtype Change
 }
 
-open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
+open class ChangeStore<Definition: ChangeStoreDefinition>: Module<Definition.Action, Definition.Output>, _StoreType {
     public typealias State = Definition.State
     public typealias Change = Definition.Change
     public typealias Action = Definition.Action
@@ -25,8 +25,6 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
     private let actionSubject = PublishSubject<Action>()
     private let outputSubject = PublishSubject<Output>()
     
-    internal let bag = DisposeBag()
-    
     private let qos: DispatchQoS
     // Linear queue which ensures sequential change processing. It is important the one change finishes processing (creating new state) before the next begins processing.
     private lazy var changeQueue = DispatchQueue(label: "ChangeQueue", qos: qos)
@@ -34,6 +32,7 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
     public init(initialState: State, qos: DispatchQoS = .userInitiated) {
         self.stateVariable = Variable<State>(initialState)
         self.qos = qos
+        super.init()
         setUp()
     }
     
@@ -47,8 +46,6 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
             .disposed(by: bag)
         
     }
-    
-    open func handleAction(_ action: Action) { fatalError(abstractMethodMessage) }
     
     open class func reduce(change: Change, state: State) -> State { fatalError(abstractMethodMessage) }
     
@@ -75,10 +72,6 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
         }
     }
     
-    public func dispatchOutput(_ output: Output) {
-        outputSubject.onNext(output)
-    }
-    
     internal var stateObservable: Observable<State> { return stateVariable.asObservable() }
     
     public var getState: () -> State {
@@ -90,6 +83,5 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: _StoreType {
     }
     
     internal var actionObserver: AnyObserver<Action> { return actionSubject.asObserver() }
-    internal var outputObservable: Observable<Output> { return outputSubject.asObservable() }
     
 }
