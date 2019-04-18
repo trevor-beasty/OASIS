@@ -53,4 +53,8 @@ public class ReducerStore<State, Action, Output, AgentInput>: Module<Action, Out
         
     }
     
+    public func update(_ newState: State) {
+        self.stateVariable.value = newState
+    }
+    
 }
