@@ -22,7 +22,6 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: Module<Definition.Act
     public typealias Output = Definition.Output
     
     private let stateVariable: Variable<State>
-    private let actionSubject = PublishSubject<Action>()
     private let outputSubject = PublishSubject<Output>()
     
     private let qos: DispatchQoS
@@ -81,7 +80,5 @@ open class ChangeStore<Definition: ChangeStoreDefinition>: Module<Definition.Act
         }
         
     }
-    
-    internal var actionObserver: AnyObserver<Action> { return actionSubject.asObserver() }
     
 }
