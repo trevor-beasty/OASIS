@@ -174,3 +174,13 @@ func playLottery(player: Lottery.Player, completion: @escaping (WWResult<Bool>) 
         completion(.success(winner))
     })
 }
+
+/*
+ emit() is better than return values in the reducer
+ 
+ If we are to interpret the store as having a reduce function which returns the new state, then the store should be considered equivocal
+ to the reduce function and we should not allow reduce to be called from within itself. Along these lines, the reduce function would be static
+ and service calls would not be triggered within the store. Service c The store would simply be a shell which generates synchronous updates via its reduce function.
+ 
+ 
+ */
