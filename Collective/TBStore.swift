@@ -42,7 +42,12 @@ class TBStore<Definition: TBStoreDefinition>: TBStoreProtocol {
     
     // Public API
     
-    internal init(initialState: State, qos: DispatchQoS = .userInitiated) {
+    public static func create(with initialState: State) -> AnyTBStore<Definition> {
+        let store = self.init(initialState: initialState)
+        return store.asAnyStore()
+    }
+    
+    required internal init(initialState: State, qos: DispatchQoS = .userInitiated) {
         self.state = initialState
         self.qos = qos
     }
@@ -117,6 +122,39 @@ class TBStoreAdapter<StoreDefinition: TBStoreDefinition, ViewDefinition: TBViewD
     func dispatchAction(_ viewAction: ViewAction) {
         let action = actionMap(viewAction)
         store.handleAction(action)
+    }
+    
+}
+
+class AnyTBStore<Definition: TBStoreDefinition>: TBStoreProtocol {
+    typealias State = Definition.State
+    typealias Action = Definition.Action
+    typealias Output = Definition.Output
+    
+    private let store: TBStore<Definition>
+    
+    init(_ store: TBStore<Definition>) {
+        self.store = store
+    }
+    
+    func handleAction(_ action: Action) {
+        store.handleAction(action)
+    }
+    
+    func observeState(_ observer: @escaping (State) -> Void) {
+        store.observeState(observer)
+    }
+    
+    func observeOutput(_ observer: @escaping (Output, State) -> Void) {
+        store.observeOutput(observer)
+    }
+    
+}
+
+extension TBStore {
+    
+    func asAnyStore() -> AnyTBStore<Definition> {
+        return AnyTBStore<Definition>(self)
     }
     
 }
