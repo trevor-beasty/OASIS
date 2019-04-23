@@ -7,10 +7,13 @@
 
 import Foundation
 
-public protocol TBStoreDefinition {
-    associatedtype State
+public protocol TBModuleDefinition {
     associatedtype Action
     associatedtype Output
+}
+
+public protocol TBStoreDefinition: TBModuleDefinition {
+    associatedtype State
 }
 
 public protocol TBViewDefinition {
@@ -18,44 +21,52 @@ public protocol TBViewDefinition {
     associatedtype ViewAction
 }
 
+public protocol TBModuleProtocol: TBModuleDefinition {
+    func handleAction(_ action: Action)
+    func observeOutput(_ observer: @escaping (Output) -> Void)
+}
+
 public protocol TBStoreProtocol: AnyObject, TBStoreDefinition {
     func handleAction(_ action: Action)
     func observeState(_ observer: @escaping (State) -> Void)
-    func observeOutput(_ observer: @escaping (Output, State) -> Void)
+    func observeStatefulOutput(_ observer: @escaping (Output, State) -> Void)
 }
 
-class TBModule<Action, Output> {
+open class TBModule<Action, Output>: TBModuleProtocol {
     
+    private var outputObservers: [(Output) -> Void] = []
     
+    public init() { }
+    
+    open func handleAction(_ action: Action) {
+        
+    }
+    
+    public func observeOutput(_ observer: @escaping (Output) -> Void) {
+        outputObservers.append(observer)
+    }
+    
+    public func output(_ output: Output) {
+        emit {
+            self.outputObservers.forEach({ $0(output) })
+        }
+    }
     
 }
 
-open class TBStore<Definition: TBStoreDefinition>: TBStoreProtocol {
+open class TBStore<Definition: TBStoreDefinition>: TBModule<Definition.Action, Definition.Output>, TBStoreProtocol {
     public typealias State = Definition.State
-    public typealias Action = Definition.Action
-    public typealias Output = Definition.Output
     
     public private(set) var state: State
-    internal var stateObservers: [(State) -> Void] = []
-    internal var outputObservers: [(Output, State) -> Void] = []
-    
-    internal let qos: DispatchQoS
-    private lazy var processingQueue = DispatchQueue(label: "StoreProcessing", qos: qos)
-    
-    // Public API
+    private var stateObservers: [(State) -> Void] = []
     
     public static func create(with initialState: State) -> AnyTBStore<TBStore<Definition>> {
         let store = self.init(initialState: initialState)
         return store.asAnyStore()
     }
     
-    public required init(initialState: State, qos: DispatchQoS = .userInitiated) {
+    public required init(initialState: State) {
         self.state = initialState
-        self.qos = qos
-    }
-    
-    open func handleAction(_ action: Action) {
-        fatalError(abstractMethodMessage)
     }
     
     public func observeState(_ observer: @escaping (State) -> Void) {
@@ -66,21 +77,16 @@ open class TBStore<Definition: TBStoreDefinition>: TBStoreProtocol {
         }
     }
     
-    public func observeOutput(_ observer: @escaping (Output, State) -> Void) {
-        outputObservers.append(observer)
+    public func observeStatefulOutput(_ observer: @escaping (Output, State) -> Void) {
+        observeOutput({ output in
+            observer(output, self.state)
+        })
     }
     
     public func update(_ newState: State) {
         self.state = newState
         emit {
             self.stateObservers.forEach({ $0(newState) })
-        }
-    }
-    
-    public func output(_ output: Output) {
-        let currentState = state
-        emit {
-            self.outputObservers.forEach({ $0(output, currentState) })
         }
     }
     
@@ -147,8 +153,8 @@ public class AnyTBStore<Store: TBStoreProtocol>: TBStoreProtocol {
         store.observeState(observer)
     }
     
-    public func observeOutput(_ observer: @escaping (Output, State) -> Void) {
-        store.observeOutput(observer)
+    public func observeStatefulOutput(_ observer: @escaping (Output, State) -> Void) {
+        store.observeStatefulOutput(observer)
     }
     
 }
