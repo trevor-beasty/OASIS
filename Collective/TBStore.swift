@@ -7,31 +7,33 @@
 
 import Foundation
 
-protocol TBStoreDefinition {
+public protocol TBStoreDefinition {
     associatedtype State
     associatedtype Action
     associatedtype Output
 }
 
-protocol TBViewDefinition {
+public protocol TBViewDefinition {
     associatedtype ViewState
     associatedtype ViewAction
 }
 
-protocol TBStoreProtocol {
-    associatedtype State
-    associatedtype Action
-    associatedtype Output
-    
+public protocol TBStoreProtocol: AnyObject, TBStoreDefinition {
     func handleAction(_ action: Action)
     func observeState(_ observer: @escaping (State) -> Void)
     func observeOutput(_ observer: @escaping (Output, State) -> Void)
 }
 
-class TBStore<Definition: TBStoreDefinition>: TBStoreProtocol {
-    typealias State = Definition.State
-    typealias Action = Definition.Action
-    typealias Output = Definition.Output
+class TBModule<Action, Output> {
+    
+    
+    
+}
+
+open class TBStore<Definition: TBStoreDefinition>: TBStoreProtocol {
+    public typealias State = Definition.State
+    public typealias Action = Definition.Action
+    public typealias Output = Definition.Output
     
     public private(set) var state: State
     internal var stateObservers: [(State) -> Void] = []
@@ -42,12 +44,12 @@ class TBStore<Definition: TBStoreDefinition>: TBStoreProtocol {
     
     // Public API
     
-    public static func create(with initialState: State) -> AnyTBStore<Definition> {
+    public static func create(with initialState: State) -> AnyTBStore<TBStore<Definition>> {
         let store = self.init(initialState: initialState)
         return store.asAnyStore()
     }
     
-    required internal init(initialState: State, qos: DispatchQoS = .userInitiated) {
+    public required init(initialState: State, qos: DispatchQoS = .userInitiated) {
         self.state = initialState
         self.qos = qos
     }
@@ -126,35 +128,35 @@ class TBStoreAdapter<StoreDefinition: TBStoreDefinition, ViewDefinition: TBViewD
     
 }
 
-class AnyTBStore<Definition: TBStoreDefinition>: TBStoreProtocol {
-    typealias State = Definition.State
-    typealias Action = Definition.Action
-    typealias Output = Definition.Output
+public class AnyTBStore<Store: TBStoreProtocol>: TBStoreProtocol {
+    public typealias State = Store.State
+    public typealias Action = Store.Action
+    public typealias Output = Store.Output
     
-    private let store: TBStore<Definition>
+    private let store: Store
     
-    init(_ store: TBStore<Definition>) {
+    init(_ store: Store) {
         self.store = store
     }
     
-    func handleAction(_ action: Action) {
+    public func handleAction(_ action: Action) {
         store.handleAction(action)
     }
     
-    func observeState(_ observer: @escaping (State) -> Void) {
+    public func observeState(_ observer: @escaping (State) -> Void) {
         store.observeState(observer)
     }
     
-    func observeOutput(_ observer: @escaping (Output, State) -> Void) {
+    public func observeOutput(_ observer: @escaping (Output, State) -> Void) {
         store.observeOutput(observer)
     }
     
 }
 
-extension TBStore {
+extension TBStoreProtocol {
     
-    func asAnyStore() -> AnyTBStore<Definition> {
-        return AnyTBStore<Definition>(self)
+    func asAnyStore() -> AnyTBStore<Self> {
+        return AnyTBStore<Self>(self)
     }
     
 }
