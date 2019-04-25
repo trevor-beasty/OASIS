@@ -26,9 +26,8 @@ public protocol TBModuleProtocol: TBModuleDefinition {
     func observeOutput(_ observer: @escaping (Output) -> Void)
 }
 
-public protocol TBStoreProtocol: AnyObject, TBStoreDefinition {
+public protocol TBStoreProtocol: TBStoreDefinition, StateBindable {
     func handleAction(_ action: Action)
-    func observeState(_ observer: @escaping (State) -> Void)
     func observeStatefulOutput(_ observer: @escaping (Output, State) -> Void)
 }
 
@@ -39,7 +38,7 @@ open class TBModule<Action, Output>: TBModuleProtocol {
     public init() { }
     
     open func handleAction(_ action: Action) {
-        
+        fatalError(abstractMethodMessage)
     }
     
     public func observeOutput(_ observer: @escaping (Output) -> Void) {
@@ -56,8 +55,9 @@ open class TBModule<Action, Output>: TBModuleProtocol {
 
 open class TBStore<Definition: TBStoreDefinition>: TBModule<Definition.Action, Definition.Output>, TBStoreProtocol {
     public typealias State = Definition.State
+    public typealias R = State
     
-    public private(set) var state: State
+    public private(set) var stateBinder: Binder<State>
     private var stateObservers: [(State) -> Void] = []
     
     public static func create(with initialState: State) -> AnyTBStore<TBStore<Definition>> {
@@ -66,28 +66,14 @@ open class TBStore<Definition: TBStoreDefinition>: TBModule<Definition.Action, D
     }
     
     public required init(initialState: State) {
-        self.state = initialState
-    }
-    
-    public func observeState(_ observer: @escaping (State) -> Void) {
-        stateObservers.append(observer)
-        let currentState = state
-        emit {
-            observer(currentState)
-        }
+        self.stateBinder = Binder(initialState)
     }
     
     public func observeStatefulOutput(_ observer: @escaping (Output, State) -> Void) {
-        observeOutput({ output in
-            observer(output, self.state)
+        observeOutput({ [weak self] output in
+            guard let strongSelf = self else { return }
+            observer(output, strongSelf .stateBinder.value)
         })
-    }
-    
-    public func update(_ newState: State) {
-        self.state = newState
-        emit {
-            self.stateObservers.forEach({ $0(newState) })
-        }
     }
     
 }
@@ -96,40 +82,40 @@ private func emit(_ execute: @escaping () -> Void) {
     DispatchQueue.main.async(execute: execute)
 }
 
-class TBStoreAdapter<StoreDefinition: TBStoreDefinition, ViewDefinition: TBViewDefinition> {
+internal class TBStoreAdapter<StoreDefinition: TBStoreDefinition, ViewDefinition: TBViewDefinition>: StateBindable {
     typealias Store = TBStore<StoreDefinition>
+    typealias State = StoreDefinition.State
+    typealias Action = StoreDefinition.Action
     typealias ViewState = ViewDefinition.ViewState
     typealias ViewAction = ViewDefinition.ViewAction
     
-    typealias StateMap = (Store.State) -> ViewState
-    typealias ActionMap = (ViewAction) -> Store.Action
+    typealias R = ViewState
+    
+    typealias StateMap = (State) -> ViewState
+    typealias ActionMap = (ViewAction) -> Action
     
     private let stateMap: StateMap
     private let actionMap: ActionMap
     
     private let store: Store
     
-    init(_ store: Store, stateMap: @escaping StateMap, actionMap: @escaping ActionMap) {
+    internal init(_ store: Store, stateMap: @escaping StateMap, actionMap: @escaping ActionMap) {
         self.store = store
         self.stateMap = stateMap
         self.actionMap = actionMap
     }
     
-    var viewState: ViewState {
-        return stateMap(store.state)
-    }
-    
-    func observeState(_ observer: @escaping (ViewState) -> Void) {
-        let stateMap = self.stateMap
-        store.observeState({ state in
-            let viewState = stateMap(state)
-            observer(viewState)
-        })
-    }
-    
     func dispatchAction(_ viewAction: ViewAction) {
         let action = actionMap(viewAction)
         store.handleAction(action)
+    }
+    
+    var stateBinder: Binder<State> {
+        return store.stateBinder
+    }
+    
+    var transform: (State) -> ViewState {
+        return stateMap
     }
     
 }
@@ -139,9 +125,11 @@ public class AnyTBStore<Store: TBStoreProtocol>: TBStoreProtocol {
     public typealias Action = Store.Action
     public typealias Output = Store.Output
     
+    public typealias R = State
+    
     private let store: Store
     
-    init(_ store: Store) {
+    internal init(_ store: Store) {
         self.store = store
     }
     
@@ -149,12 +137,12 @@ public class AnyTBStore<Store: TBStoreProtocol>: TBStoreProtocol {
         store.handleAction(action)
     }
     
-    public func observeState(_ observer: @escaping (State) -> Void) {
-        store.observeState(observer)
-    }
-    
     public func observeStatefulOutput(_ observer: @escaping (Output, State) -> Void) {
         store.observeStatefulOutput(observer)
+    }
+    
+    public var stateBinder: Binder<State> {
+        return store.stateBinder
     }
     
 }

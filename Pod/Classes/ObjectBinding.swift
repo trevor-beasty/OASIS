@@ -9,15 +9,15 @@ import Foundation
 
 // Reference management handled by ResourceBindingManager allows clients to tie together the lives of disparate objects.
 // An object will live as long as any of the objects to which it is 'bound'.
-internal final class BindingManager {
+internal final class ObjectBindingManager {
     
-    static let shared = BindingManager()
+    static let shared = ObjectBindingManager()
     
     private var retained: [(bound: AnyObject, binders: [WeakBox<AnyObject>])] = []
     
     private init() { }
     
-    func handleDeallocatin(of binder: Binder) {
+    func handleDeallocatin(of binder: ObjectBinder) {
         binder.bound
             .compactMap({ $0.boxed })
             .forEach({ handleDeallocatin(for: $0) })
@@ -49,24 +49,24 @@ internal final class BindingManager {
     }
 }
 
-public protocol Bindable: AnyObject {
-    var binder: Binder { get }
+public protocol ObjectBindable: AnyObject {
+    var binder: ObjectBinder { get }
 }
 
-public final class Binder {
+public final class ObjectBinder {
     
     private(set) var bound: [WeakBox<AnyObject>] = []
     
     public init() { }
     
     deinit {
-        BindingManager.shared.handleDeallocatin(of: self)
+        ObjectBindingManager.shared.handleDeallocatin(of: self)
     }
     
     internal func bind(_ toBound: AnyObject) {
         let _toBound = WeakBox<AnyObject>(toBound)
         bound.append(_toBound)
-        BindingManager.shared.handleBind(binder: self, bound: toBound)
+        ObjectBindingManager.shared.handleBind(binder: self, bound: toBound)
     }
     
 }
@@ -81,7 +81,7 @@ internal final class WeakBox<T: AnyObject> {
     
 }
 
-extension Bindable {
+extension ObjectBindable {
     
     public func bind(_ toBound: AnyObject) {
         binder.bind(toBound)
